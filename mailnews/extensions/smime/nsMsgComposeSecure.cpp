@@ -323,6 +323,14 @@ static nsresult GetSigningHashFunction(nsIX509Cert* aSigningCert,
     } else {
       *hashType = nsICryptoHash::SHA1;
     }
+  } else if (subjectPublicKeyType == mldsaKey) {
+    // ML-DSA signs the message itself rather than a digest of it, so siglen
+    // says nothing about the strength of an accompanying hash. The digest
+    // chosen here only feeds the messageDigest signed attribute. RFC 9882,
+    // Table 1 limits which digests may accompany each parameter set, and
+    // SHA-512 is both the only one acceptable for all of them and the one
+    // section 3.3 makes a MUST to support.
+    *hashType = nsICryptoHash::SHA512;
   } else {
     // Unknown key type
     *hashType = nsICryptoHash::SHA256;

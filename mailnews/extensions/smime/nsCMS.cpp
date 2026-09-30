@@ -473,6 +473,12 @@ NS_IMETHODIMP nsCMSMessage::GetKeyEncAlgorithmName(nsACString& aResult) {
     case NSSCMSRecipientInfoID_KEK:
       keyEncAlgTag = SECOID_GetAlgorithmTag(&ri->ri.kekRecipientInfo.keyEncAlg);
       break;
+    case NSSCMSRecipientInfoID_KEM:
+      // KEM has three algorithm identifiers (kem/kdf/wrap); "wrap" is the
+      // one that actually encrypted the bulk key bytes.
+      keyEncAlgTag = SECOID_GetAlgorithmTag(
+          &ri->ri.otherRecipientInfo.kemRecipientInfo.wrap);
+      break;
     default:
       break;
   }
@@ -502,6 +508,12 @@ NS_IMETHODIMP nsCMSMessage::GetKeyEncAlgorithmName(nsACString& aResult) {
     case SEC_OID_DHSINGLEPASS_STDDH_SHA512KDF_SCHEME:
     case SEC_OID_DHSINGLEPASS_COFACTORDH_SHA512KDF_SCHEME:
       aResult.AssignLiteral("ECDH (SHA-512 KDF)");
+      break;
+    case SEC_OID_AES_128_KEY_WRAP:
+      aResult.AssignLiteral("AES-128 Key Wrap");
+      break;
+    case SEC_OID_AES_256_KEY_WRAP:
+      aResult.AssignLiteral("AES-256 Key Wrap");
       break;
     default: {
       SECOidData* oidData = SECOID_FindOIDByTag(keyEncAlgTag);
